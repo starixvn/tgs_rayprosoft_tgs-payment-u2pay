@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configmap-{{ include "u2-pay.fullname" . }}
+  labels:
+    {{- include "u2-pay.labels" . | nindent 4 }}
+data:
+  appsettings.json: |
+    {
+      "U2Pay": {
+        "PaymentServiceBaseUrl": "http://payment-api"
+      },
+      "Logging": {
+        "LogLevel": {
+          "Microsoft.AspNetCore.HttpLogging": "Information",
+          "Tgs.Payment.U2Pay.U2PayOptions": "Information"
+        }
+      }
+    }
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+
+    processors:
+      batch:
+
+    exporters:
+      otlp:
+        endpoint: "$NODE_IP:4317"
+        tls:
+          insecure: true
+      prometheus:
+        endpoint: "0.0.0.0:8889"
+        namespace: "{{ .Release.Name }}"
+
+    extensions:
+      health_check:
+        endpoint: 0.0.0.0:13133
+
+    service:
+      extensions: [health_check]
+      pipelines:
+        traces: 
+          receivers: [otlp]
+          processors:
+            - batch
+          exporters: [otlp]
+        metrics:
+          receivers: [otlp]
+          exporters: [prometheus]

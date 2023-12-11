@@ -1,0 +1,104 @@
+include:
+  - project: rayprosoft/tgs-ci-scripts
+    ref: main
+    file: GitLab/Templates/gitlab-job-templates.yml
+
+variables:
+  ImageName: pgtgs/payment-u2
+  TgsSettingKey: payment-u2pay
+  HelmTemplateFolderName: u2-pay
+  BuildCacheKey: Tgs.U2Pay.$CI_PIPELINE_IID
+
+stages:
+  - build
+  - test
+  - publish
+  - deploy-dev
+  - deploy-staging
+  - deploy-prod
+
+build-code:
+  extends: .build-code-template
+
+unit-test:
+  extends: .unit-test-template
+  variables:
+    Framework: net7.0
+
+push-nuget:
+  extends: .push-nuget-template
+  script:
+    - push_package 'U2Pay.Client'
+  artifacts:
+    paths:
+      - U2Pay.Client/bin/$BuildConfiguration/*.nupkg
+
+push-docker-image:
+  stage: publish
+  needs:
+    - build-code      
+    - unit-test
+  only:
+    - main
+  cache:
+    key: Tgs.Payment.U2Pay.$CI_PIPELINE_ID
+    untracked: true
+    policy: pull
+  script:
+    - export Tag="$(date -d $CI_PIPELINE_CREATED_AT +%Y%m%d%H%M).$CI_PIPELINE_IID"
+    - docker build --build-arg $BuildConfiguration -f Tgs.Payment.U2Pay/Dockerfile -t $ImageName:$Tag . --no-cache
+    - docker push $ImageName:$Tag
+
+push-k8s-template:
+  extends: .push-k8s-template
+  script:
+    - push_k8s_template $HelmTemplateFolderName $ImageName $Tag
+
+deploy-dev:
+  extends: .deploy-template
+  variables:
+    namespace: dev
+    kube_config: KubeConfig_Raypro_dev
+  environment:
+    name: dev
+  stage: deploy-dev
+  needs:
+    - push-nuget
+    - push-docker-image
+    - job: push-k8s-template
+      artifacts: true
+  only:
+    - main
+  when: on_success
+
+deploy-staging:
+  extends: .deploy-template
+  variables:
+    namespace: staging
+    kube_config: KubeConfig_Raypro_staging
+  environment:
+    name: staging
+  stage: deploy-staging
+  needs:
+    - deploy-dev
+    - job: push-k8s-template
+      artifacts: true
+  only:
+    - main
+  when: manual
+
+deploy-prod:
+  extends: .deploy-template
+  variables:
+    namespace: prod
+    kube_config: KubeConfig_Raypro_prod
+  environment:
+    name: prod
+  stage: deploy-prod
+  needs:
+    - deploy-staging
+    - job: push-k8s-template
+      artifacts: true
+  only:
+    - main
+  when: manual

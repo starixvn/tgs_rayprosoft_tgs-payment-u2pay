@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	  <RootNamespace>Tgs.Payment.U2Pay.Client</RootNamespace>
+	  <Version>0.0.1</Version>
+	  <Authors>Raypro</Authors>
+	  <Company>Raypro</Company>
+	  <PackageId>Tgs.Payment.U2Pay.Client</PackageId>
+	  <Title>Tgs.Payment.U2Pay.Client</Title>
+	  <PackageProjectUrl>https://gitlab.com/rayprosoft/tgs-payment-u2opay</PackageProjectUrl>
+	  <RepositoryUrl>https://gitlab.com/rayprosoft/tgs-payment-u2pay.git</RepositoryUrl>
+	  <PackageTags>Tgs Payment U2Pay</PackageTags>
+  </PropertyGroup>
+
+</Project>

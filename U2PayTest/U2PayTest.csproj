@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NSubstitute" Version="5.1.0" />
+		<PackageReference Include="PhoenixToolkits.MessageQueue.Nats" Version="1.0.6" />
+		<PackageReference Include="Tgs.MessageQueue.Compatible" Version="0.0.2" />
+		<PackageReference Include="Tgs.Payment.Client" Version="0.5.0" />
+		<PackageReference Include="Tgs.WebApi.Toolkits" Version="0.3.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\U2Pay.Client\U2Pay.Client.csproj" />
+	  <ProjectReference Include="..\U2Pay.Core\U2Pay.Core.csproj" />
+	</ItemGroup>
+	
+</Project>
