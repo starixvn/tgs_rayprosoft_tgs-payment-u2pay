@@ -11,7 +11,7 @@ WORKDIR /src
 COPY ["nuget.config", "."]
 COPY ["Tgs.Payment.U2Pay/Tgs.Payment.U2Pay.csproj", "Tgs.Payment.U2Pay/"]
 COPY ["U2Pay.Core/U2Pay.Core.csproj", "U2Pay.Core/"]
-COPY ["U2PayClient/U2Pay.Client.csproj", "U2PayClient/"]
+COPY ["U2Pay.Client/U2Pay.Client.csproj", "U2Pay.Client/"]
 RUN dotnet restore "./Tgs.Payment.U2Pay/./Tgs.Payment.U2Pay.csproj"
 COPY . .
 WORKDIR "/src/Tgs.Payment.U2Pay"
