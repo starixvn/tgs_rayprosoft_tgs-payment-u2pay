@@ -46,7 +46,8 @@ public class WithdrawTests
             formId,
             "NGUYEN",
             "VCB",
-            "testBankAccount");
+            "testBankAccount",
+            ExchangeRate: 1m);
         var withdrawResponse = new U2PayWithdrawResponse(formId, "159421");
 
         var applyInfo = new U2PayWithdrawApplyInfo(settings, withdrawResponse);
@@ -127,7 +128,8 @@ public class WithdrawTests
             formId,
             "NGUYEN",
             BankName: "VIETCOMBANK",
-            BankAccount: "testBankAccount");
+            BankAccount: "testBankAccount",
+            ExchangeRate: 1m);
         var withdrawResponse = new U2PayWithdrawResponse(formId, "161844");
 
         var applyInfo = new U2PayWithdrawApplyInfo(settings, withdrawResponse);

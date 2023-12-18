@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using Tgs.Payment.Clients;
 using Tgs.Payment.U2Pay.ApplicationServices;
 using Tgs.Payment.U2Pay.Client;
@@ -65,6 +65,8 @@ public class DepositController : ControllerBase
             RealAmount = source.Paid,
             OrderAmount = source.Amount,
             Sign = sign,
+            AfterExchangeRealAmount = source.Paid / depositForm.ApplyInfo.Settings.ExchangeRate,
+            AfterExchangeOrderAmount = source.Amount / depositForm.ApplyInfo.Settings.ExchangeRate
         };
 
         var fsm = PaymentStateMachineFactory.CreateDepositStateMachine(depositForm.Status);
@@ -86,7 +88,7 @@ public class DepositController : ControllerBase
                     await paymentClient.ApproveDepositAsync(
                         depositForm.Id,
                         depositForm.BrandId,
-                        paymentReturn.RealAmount,
+                        paymentReturn.AfterExchangeRealAmount,
                         HttpContext.RequestAborted).ConfigureAwait(false);
                 }
 

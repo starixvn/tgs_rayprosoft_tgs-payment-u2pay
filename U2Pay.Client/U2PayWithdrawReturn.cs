@@ -10,4 +10,6 @@ public record U2PayWithdrawReturn
     public string Status { get; set; } = default!;
 
     public string Sign { get; set; } = default!;
+
+    public decimal AfterExchangeAmount { get; set; }
 }

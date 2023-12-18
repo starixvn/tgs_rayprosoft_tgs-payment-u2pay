@@ -1,4 +1,6 @@
-﻿namespace Tgs.Payment.U2Pay.Client;
+﻿using System.ComponentModel;
+
+namespace Tgs.Payment.U2Pay.Client;
 public record U2PayWithdrawSettings(
     string MerchantNo,
     string AppSecret,
@@ -6,4 +8,6 @@ public record U2PayWithdrawSettings(
     Guid FormId,
     string ReceiverName,
     string BankName,
-    string BankAccount);
+    string BankAccount,
+    [property: Description("匯率轉換")]
+    decimal ExchangeRate);
