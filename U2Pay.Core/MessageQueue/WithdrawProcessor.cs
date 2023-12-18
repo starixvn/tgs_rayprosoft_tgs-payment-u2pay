@@ -31,7 +31,7 @@ internal class WithdrawProcessor : IMessageProcessor
 
         var order = new WithdrawOrder(
             settings.FormId,
-            decimal.Parse(request.Amount),
+            decimal.Parse(request.Amount) * settings.ExchangeRate,
             new Uri($"{_options.CallbackBaseUrl}/withdraw/callback"),
             settings.ReceiverName,
             settings.BankName,

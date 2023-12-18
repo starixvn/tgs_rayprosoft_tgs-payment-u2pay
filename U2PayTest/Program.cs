@@ -40,9 +40,16 @@ var privateKey = "ClLtElIsn0O2VDFYYbTMZg";
 
 //logger.LogInformation("DepositReturn: {depositReturn}", depositReturn);
 
-
 //Withdraw
-var withdrawSettings = new U2PayWithdrawSettings(merchantNo, appSecret, privateKey, Guid.NewGuid(), "NGUYEN", "VCB", "testBankAccount");
+var withdrawSettings = new U2PayWithdrawSettings(
+    merchantNo,
+    appSecret,
+    privateKey,
+    Guid.NewGuid(),
+    "NGUYEN",
+    "VCB",
+    "testBankAccount",
+    ExchangeRate: 1m);
 
 var withdrawReturn = await paymentClient.WithdrawAsync(
     "tgs.payment.u2pay.withdraw",
@@ -50,7 +57,6 @@ var withdrawReturn = await paymentClient.WithdrawAsync(
     JsonSerializer.Serialize(withdrawSettings, U2PayUtility.SerializerOptions)).ConfigureAwait(false);
 
 logger.LogInformation("WithdrawReturn: {withdrawReturn}", withdrawReturn);
-
 
 //訂單查詢
 //var httpClient = new HttpClient();
@@ -60,7 +66,6 @@ logger.LogInformation("WithdrawReturn: {withdrawReturn}", withdrawReturn);
 
 //var queryReturn = await client.QueryDepositFormStatusAsync(merchantNo, appSecret, privateKey, Guid.Parse("fc20591611624e8fb67b050c2233b930"));
 //logger.LogInformation("{return}", queryReturn);
-
 
 //商戶餘額查詢
 //var httpClient = new HttpClient();

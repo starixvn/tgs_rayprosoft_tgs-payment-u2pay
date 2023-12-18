@@ -38,7 +38,8 @@ public class DepositTimeoutCheckHandlerTests
                 "ClLtElIsn0O2VDFYYbTMZg",
                 formId,
                 2,
-                "AGR"),
+                "AGR",
+                ExchangeRate: 1m),
             new U2PayDepositResponse(
                 1000000m,
                 formId,

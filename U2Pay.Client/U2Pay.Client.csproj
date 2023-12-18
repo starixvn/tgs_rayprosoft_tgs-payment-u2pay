@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <RootNamespace>Tgs.Payment.U2Pay.Client</RootNamespace>
-	  <Version>0.0.3</Version>
+	  <Version>0.0.4</Version>
 	  <Authors>Raypro</Authors>
 	  <Company>Raypro</Company>
 	  <PackageId>Tgs.Payment.U2Pay.Client</PackageId>
