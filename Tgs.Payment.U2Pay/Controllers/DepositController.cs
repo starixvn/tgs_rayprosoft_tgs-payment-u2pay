@@ -88,7 +88,7 @@ public class DepositController : ControllerBase
                     await paymentClient.ApproveDepositAsync(
                         depositForm.Id,
                         depositForm.BrandId,
-                        paymentReturn.AfterExchangeRealAmount,
+                        paymentReturn.AfterExchangeOrderAmount,
                         HttpContext.RequestAborted).ConfigureAwait(false);
                 }
 
