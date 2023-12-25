@@ -56,7 +56,7 @@ internal class DepositProcessor : IMessageProcessor
         await _paymentClient.ScheduleAsync(
             "tgs.payment.u2pay.deposit.schedule.reject",
             settings.FormId,
-            DateTime.UtcNow.AddMinutes(11D),
+            DateTime.UtcNow.AddMinutes(16D),
             cancellationToken).ConfigureAwait(false);
 
         var msg = new DepositResponse
