@@ -27,6 +27,7 @@ builder.Services
     .AddControllers();
 
 builder.Services
+    .AddHttpClientLoggingHandler()
     .AddU2Pay(
         options => builder.Configuration.GetSection("U2Pay").Bind(options),
         clientBuilder => clientBuilder
