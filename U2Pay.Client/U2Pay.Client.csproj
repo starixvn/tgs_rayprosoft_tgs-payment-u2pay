@@ -1,10 +1,11 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	  <RootNamespace>Tgs.Payment.U2Pay.Client</RootNamespace>
+	  <SqlQueryToolsConnectionString />
 	  <Version>0.0.4</Version>
 	  <Authors>Raypro</Authors>
 	  <Company>Raypro</Company>
@@ -14,5 +15,12 @@
 	  <RepositoryUrl>https://gitlab.com/rayprosoft/tgs-payment-u2pay.git</RepositoryUrl>
 	  <PackageTags>Tgs Payment U2Pay</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.5.22">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
 </Project>

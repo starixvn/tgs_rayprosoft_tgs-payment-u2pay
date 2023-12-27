@@ -78,7 +78,7 @@ builder.Services
         logging.MediaTypeOptions.AddText("application/x-www-form-urlencoded");
         logging.MediaTypeOptions.AddText("text/html");
         logging.MediaTypeOptions.AddText("multipart/form-data");
-    })
+    })    
     .AddHealthChecks()
     .Services
     .AddOpenTelemetry()
@@ -97,7 +97,7 @@ builder.Services
         .AddAspNetCoreInstrumentation()
         .AddOtlpExporter())
     .Services
-    .Configure<AspNetCoreInstrumentationOptions>(options => options.Filter =
+    .Configure<AspNetCoreTraceInstrumentationOptions>(options => options.Filter =
         httpContext => !httpContext.Request.Path.HasValue
             || !httpContext.Request.Path.StartsWithSegments("/swagger")
             && !httpContext.Request.Path.StartsWithSegments("/healthz")

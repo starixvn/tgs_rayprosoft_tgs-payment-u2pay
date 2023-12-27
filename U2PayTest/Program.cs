@@ -41,22 +41,22 @@ var privateKey = "ClLtElIsn0O2VDFYYbTMZg";
 //logger.LogInformation("DepositReturn: {depositReturn}", depositReturn);
 
 //Withdraw
-var withdrawSettings = new U2PayWithdrawSettings(
-    merchantNo,
-    appSecret,
-    privateKey,
-    Guid.NewGuid(),
-    "NGUYEN",
-    "VCB",
-    "testBankAccount",
-    ExchangeRate: 1m);
+//var withdrawSettings = new U2PayWithdrawSettings(
+//    merchantNo,
+//    appSecret,
+//    privateKey,
+//    Guid.NewGuid(),
+//    "NGUYEN",
+//    "VCB",
+//    "testBankAccount",
+//    ExchangeRate: 1m);
 
-var withdrawReturn = await paymentClient.WithdrawAsync(
-    "tgs.payment.u2pay.withdraw",
-    100000m,
-    JsonSerializer.Serialize(withdrawSettings, U2PayUtility.SerializerOptions)).ConfigureAwait(false);
+//var withdrawReturn = await paymentClient.WithdrawAsync(
+//    "tgs.payment.u2pay.withdraw",
+//    100000m,
+//    JsonSerializer.Serialize(withdrawSettings, U2PayUtility.SerializerOptions)).ConfigureAwait(false);
 
-logger.LogInformation("WithdrawReturn: {withdrawReturn}", withdrawReturn);
+//logger.LogInformation("WithdrawReturn: {withdrawReturn}", withdrawReturn);
 
 //訂單查詢
 //var httpClient = new HttpClient();
@@ -68,10 +68,10 @@ logger.LogInformation("WithdrawReturn: {withdrawReturn}", withdrawReturn);
 //logger.LogInformation("{return}", queryReturn);
 
 //商戶餘額查詢
-//var httpClient = new HttpClient();
-//httpClient.BaseAddress = new Uri("https://xr.hmpas.com");
-//var fakeSystemClock = Substitute.For<ISystemClock>();
-//var client = new U2PayClient(httpClient, new U2PayHasher(NullLogger<U2PayHasher>.Instance), fakeSystemClock, NullLogger<U2PayClient>.Instance);
+var httpClient = new HttpClient();
+httpClient.BaseAddress = new Uri("https://xr.hmpas.com");
+var fakeSystemClock = Substitute.For<ISystemClock>();
+var client = new U2PayClient(httpClient, new U2PayHasher(NullLogger<U2PayHasher>.Instance), fakeSystemClock, NullLogger<U2PayClient>.Instance);
 
-//var queryReturn = await client.QueryBalanceAsync(merchantNo, appSecret, privateKey);
-//logger.LogInformation("{return}", queryReturn);
+var queryReturn = await client.QueryBalanceAsync(merchantNo, appSecret, privateKey);
+logger.LogInformation("{return}", queryReturn);
