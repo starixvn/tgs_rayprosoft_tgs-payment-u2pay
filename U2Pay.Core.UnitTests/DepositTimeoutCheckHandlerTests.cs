@@ -13,7 +13,7 @@ namespace U2Pay.Core.UnitTests;
 public class DepositTimeoutCheckHandlerTests
 {
     [Fact]
-    public async Task 申請十六分鐘的單子會自動拒絕()
+    public async Task 申請六十分鐘的單子會自動拒絕()
     {
         // Arrange
         var fakePaymentServiceClient = Substitute.For<IPaymentServiceClient>();
