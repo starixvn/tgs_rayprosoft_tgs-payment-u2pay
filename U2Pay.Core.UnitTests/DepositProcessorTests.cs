@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Text.Json;
-using Google.Protobuf;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using NSubstitute;
@@ -10,7 +9,6 @@ using Tgs.Payment.Protos;
 using Tgs.Payment.U2Pay;
 using Tgs.Payment.U2Pay.Client;
 using Tgs.Payment.U2Pay.MessageQueue;
-using Tgs.SerialNumberGenerator;
 
 namespace U2Pay.Core.UnitTests;
 
@@ -25,12 +23,12 @@ public class DepositProcessorTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri("https://xr.hmpas.com");
 
-        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeTimeProvider = Substitute.For<TimeProvider>();
 
         var fakeU2PayClient = new U2PayClient(
             httpClient,
             new U2PayHasher(NullLogger<U2PayHasher>.Instance),
-            fakeSystemClock,
+            fakeTimeProvider,
             NullLogger<U2PayClient>.Instance);
 
         var fakePaymentClient = Substitute.For<IPaymentClient>();
@@ -65,7 +63,7 @@ public class DepositProcessorTests
             ApplyInfo = JsonSerializer.Serialize(applySettings, U2PayUtility.SerializerOptions)
         };
 
-        _ = fakeSystemClock.UtcNow
+        _ = fakeTimeProvider.GetUtcNow()
             .Returns(DateTimeOffset.FromUnixTimeSeconds(1701935918));
 
         _ = mockHttp
@@ -96,9 +94,14 @@ public class DepositProcessorTests
                 """));
 
         // Act
-        var actual = await sut.HandleAsync(request.ToByteArray());
-        var response = DepositResponse.Parser.ParseFrom(actual.Span);
-        var applyInfo = JsonSerializer.Deserialize<U2PayDepositApplyInfo>(response.Result, U2PayUtility.SerializerOptions);
+        var actual = await sut.HandleAsync(
+            "test",
+            request,
+            null);
+
+        var applyInfo = JsonSerializer.Deserialize<U2PayDepositApplyInfo>(
+            actual.Result,
+            U2PayUtility.SerializerOptions);
 
         // Assert
         _ = fakePaymentClient.Received(1)
@@ -127,12 +130,12 @@ public class DepositProcessorTests
         var httpClient = mockHttp.ToHttpClient();
         httpClient.BaseAddress = new Uri("https://xr.hmpas.com");
 
-        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeTimeProvider = Substitute.For<TimeProvider>();
 
         var fakeU2PayClient = new U2PayClient(
             httpClient,
             new U2PayHasher(NullLogger<U2PayHasher>.Instance),
-            fakeSystemClock,
+            fakeTimeProvider,
             NullLogger<U2PayClient>.Instance);
 
         var fakePaymentClient = Substitute.For<IPaymentClient>();
@@ -158,7 +161,7 @@ public class DepositProcessorTests
             privateKey,
             formId,
             2,
-            "AGR", 
+            "AGR",
             ExchangeRate: 1000m);
 
         var request = new DepositRequest
@@ -167,7 +170,7 @@ public class DepositProcessorTests
             ApplyInfo = JsonSerializer.Serialize(applySettings, U2PayUtility.SerializerOptions)
         };
 
-        _ = fakeSystemClock.UtcNow
+        _ = fakeTimeProvider.GetUtcNow()
             .Returns(DateTimeOffset.FromUnixTimeSeconds(1701935918));
 
         _ = mockHttp
@@ -198,9 +201,12 @@ public class DepositProcessorTests
                 """));
 
         // Act
-        var actual = await sut.HandleAsync(request.ToByteArray());
-        var response = DepositResponse.Parser.ParseFrom(actual.Span);
-        var applyInfo = JsonSerializer.Deserialize<U2PayDepositApplyInfo>(response.Result, U2PayUtility.SerializerOptions);
+        var actual = await sut.HandleAsync(
+            "test",
+            request,
+            null);
+
+        var applyInfo = JsonSerializer.Deserialize<U2PayDepositApplyInfo>(actual.Result, U2PayUtility.SerializerOptions);
 
         // Assert
         _ = fakePaymentClient.Received(1)

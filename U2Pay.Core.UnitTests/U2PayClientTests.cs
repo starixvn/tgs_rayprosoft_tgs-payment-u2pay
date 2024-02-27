@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
 using RichardSzalay.MockHttp;
 using Tgs.Payment.U2Pay;
-using Tgs.SerialNumberGenerator;
 
 namespace U2Pay.Core.UnitTests;
 
@@ -18,15 +17,15 @@ public class U2PayClientTests
         httpClient.BaseAddress = new Uri("https://xr.hmpas.com");
 
         var signer = new U2PayHasher(NullLogger<U2PayHasher>.Instance);
-        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeTimeProvider = Substitute.For<TimeProvider>();
 
-        var sut = new U2PayClient(httpClient, signer, fakeSystemClock, NullLogger<U2PayClient>.Instance);
+        var sut = new U2PayClient(httpClient, signer, fakeTimeProvider, NullLogger<U2PayClient>.Instance);
 
         var merchantNo = "110630";
         var appSecret = "ageDUOgK6kumEoTb2tjraA";
         var privateKey = "ClLtElIsn0O2VDFYYbTMZg";
 
-        _ = fakeSystemClock.UtcNow
+        _ = fakeTimeProvider.GetUtcNow()
             .Returns(DateTimeOffset.FromUnixTimeSeconds(1701847072));
 
         _ = mockHttp
@@ -72,9 +71,9 @@ public class U2PayClientTests
         httpClient.BaseAddress = new Uri("https://xr.hmpas.com");
 
         var signer = new U2PayHasher(NullLogger<U2PayHasher>.Instance);
-        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeTimeProvider = Substitute.For<TimeProvider>();
 
-        var sut = new U2PayClient(httpClient, signer, fakeSystemClock, NullLogger<U2PayClient>.Instance);
+        var sut = new U2PayClient(httpClient, signer, fakeTimeProvider, NullLogger<U2PayClient>.Instance);
 
         var merchantNo = "110630";
         var appSecret = "ageDUOgK6kumEoTb2tjraA";
@@ -88,7 +87,7 @@ public class U2PayClientTests
             ChannelNo: 2,
             BankName: "AGR");
 
-        _ = fakeSystemClock.UtcNow
+        _ = fakeTimeProvider.GetUtcNow()
             .Returns(DateTimeOffset.FromUnixTimeSeconds(1701935918));
 
         _ = mockHttp
@@ -135,16 +134,16 @@ public class U2PayClientTests
         httpClient.BaseAddress = new Uri("https://xr.hmpas.com");
 
         var signer = new U2PayHasher(NullLogger<U2PayHasher>.Instance);
-        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeTimeProvider = Substitute.For<TimeProvider>();
 
-        var sut = new U2PayClient(httpClient, signer, fakeSystemClock, NullLogger<U2PayClient>.Instance);
+        var sut = new U2PayClient(httpClient, signer, fakeTimeProvider, NullLogger<U2PayClient>.Instance);
 
         var merchantNo = "110630";
         var appSecret = "ageDUOgK6kumEoTb2tjraA";
         var privateKey = "ClLtElIsn0O2VDFYYbTMZg";
         var formId = Guid.Parse("fc20591611624e8fb67b050c2233b930");
 
-        _ = fakeSystemClock.UtcNow
+        _ = fakeTimeProvider.GetUtcNow()
             .Returns(DateTimeOffset.FromUnixTimeSeconds(-62135596800));
 
         _ = mockHttp
@@ -181,9 +180,9 @@ public class U2PayClientTests
         httpClient.BaseAddress = new Uri("https://xr.hmpas.com");
 
         var signer = new U2PayHasher(NullLogger<U2PayHasher>.Instance);
-        var fakeSystemClock = Substitute.For<ISystemClock>();
+        var fakeTimeProvider = Substitute.For<TimeProvider>();
 
-        var sut = new U2PayClient(httpClient, signer, fakeSystemClock, NullLogger<U2PayClient>.Instance);
+        var sut = new U2PayClient(httpClient, signer, fakeTimeProvider, NullLogger<U2PayClient>.Instance);
 
         var merchantNo = "110630";
         var appSecret = "ageDUOgK6kumEoTb2tjraA";
@@ -198,7 +197,7 @@ public class U2PayClientTests
             BankName: "VCB",
             BankAccount: "testBankAccount");
 
-        _ = fakeSystemClock.UtcNow
+        _ = fakeTimeProvider.GetUtcNow()
             .Returns(DateTimeOffset.FromUnixTimeSeconds(1701935136));
 
         _ = mockHttp

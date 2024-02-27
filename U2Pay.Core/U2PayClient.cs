@@ -1,31 +1,17 @@
 ﻿using System.Text.Json.Nodes;
 using Microsoft.Extensions.Logging;
-using Tgs.SerialNumberGenerator;
 
 namespace Tgs.Payment.U2Pay;
 
-public class U2PayClient
+public class U2PayClient(
+    HttpClient httpClient,
+    U2PayHasher hasher,
+    TimeProvider timeProvider,
+    ILogger<U2PayClient> logger)
 {
-    private readonly HttpClient _httpClient;
-    private readonly U2PayHasher _hasher;
-    private readonly ISystemClock _systemClock;
-    private readonly ILogger<U2PayClient> _logger;
-
-    public U2PayClient(
-        HttpClient httpClient,
-        U2PayHasher hasher,
-        ISystemClock systemClock,
-        ILogger<U2PayClient> logger)
-    {
-        _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
-        _hasher = hasher ?? throw new ArgumentNullException(nameof(hasher));
-        _systemClock = systemClock ?? throw new ArgumentNullException(nameof(systemClock));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
-
     public async ValueTask<U2PayClientDepositResponse> DepositAsync(string merchantNo, string appSecert, string privateKey, DepositOrder order, CancellationToken cancellationToken = default)
     {
-        var now = _systemClock.UtcNow;
+        var now = timeProvider.GetUtcNow();
 
         var dict = new Dictionary<string, string?>
         {
@@ -45,7 +31,7 @@ public class U2PayClient
 
         var excludeKeys = new string[] { "userName", "channelNo", "payeeName", "amountBeforeFixed", "returnUrl", "appSecret", "bankName" };
 
-        var sign = _hasher.ComputeHash(privateKey, dict.Where(x => !excludeKeys.Contains(x.Key)));
+        var sign = hasher.ComputeHash(privateKey, dict.Where(x => !excludeKeys.Contains(x.Key)));
         dict["sign"] = sign;
 
         var request = new HttpRequestMessage(HttpMethod.Post, "/order/create")
@@ -53,7 +39,7 @@ public class U2PayClient
             Content = new FormUrlEncodedContent(dict)
         };
 
-        var response = await _httpClient
+        var response = await httpClient
             .SendAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
@@ -61,7 +47,7 @@ public class U2PayClient
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation("U2PayClient Deposit Body:{body}", body);
+        logger.LogInformation("U2PayClient Deposit Body:{body}", body);
 
         var node = JsonNode.Parse(body) ?? throw new ApiFailException("Deposit response can't read.");
 
@@ -82,11 +68,11 @@ public class U2PayClient
             ["merchantNo"] = merchantNo,
             ["tradeNo"] = "",
             ["orderNo"] = formId.ToString("N"),
-            ["time"] = _systemClock.UtcNow.ToUnixTimeSeconds().ToString(),
+            ["time"] = timeProvider.GetUtcNow().ToUnixTimeSeconds().ToString(),
             ["appSecret"] = appSecert,
         };
 
-        var sign = _hasher.ComputeHash(privateKey, dict.Where(x => x.Key != "appSecret"));
+        var sign = hasher.ComputeHash(privateKey, dict.Where(x => x.Key != "appSecret"));
         dict["sign"] = sign;
 
         var request = new HttpRequestMessage(HttpMethod.Post, "/order/status")
@@ -94,7 +80,7 @@ public class U2PayClient
             Content = new FormUrlEncodedContent(dict)
         };
 
-        var response = await _httpClient
+        var response = await httpClient
             .SendAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
@@ -102,7 +88,7 @@ public class U2PayClient
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation("U2PayClient Query Deposit Form Body:{body}", body);
+        logger.LogInformation("U2PayClient Query Deposit Form Body:{body}", body);
 
         var node = JsonNode.Parse(body) ?? throw new ApiFailException("Query Deposit Form response can't read.");
 
@@ -114,7 +100,7 @@ public class U2PayClient
 
     public async ValueTask<U2PayClientWithdrawResponse> WithdrawAsync(string merchantNo, string appSecert, string privateKey, WithdrawOrder order, CancellationToken cancellationToken = default)
     {
-        var now = _systemClock.UtcNow;
+        var now = timeProvider.GetUtcNow();
 
         var dict = new Dictionary<string, string?>
         {
@@ -135,7 +121,7 @@ public class U2PayClient
 
         var excludeKeys = new string[] { "bankBranch", "memo", "appSecret" };
 
-        var sign = _hasher.ComputeHash(privateKey, dict.Where(x => !excludeKeys.Contains(x.Key)));
+        var sign = hasher.ComputeHash(privateKey, dict.Where(x => !excludeKeys.Contains(x.Key)));
         dict["sign"] = sign;
 
         var request = new HttpRequestMessage(HttpMethod.Post, "/payout/create")
@@ -143,7 +129,7 @@ public class U2PayClient
             Content = new FormUrlEncodedContent(dict)
         };
 
-        var response = await _httpClient
+        var response = await httpClient
             .SendAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
@@ -151,7 +137,7 @@ public class U2PayClient
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation("U2PayClient Withdraw Body:{body}", body);
+        logger.LogInformation("U2PayClient Withdraw Body:{body}", body);
 
         var node = JsonNode.Parse(body) ?? throw new ApiFailException("Withdraw response can't read.");
 
@@ -164,16 +150,16 @@ public class U2PayClient
             ThirdPartyOrderNo: node["tradeNo"]!.GetValue<string>());
     }
 
-    public async ValueTask<decimal> QueryBalanceAsync(string merchantNo, string appSecert, string privateKey, CancellationToken cancellationToken = default)
+    public async ValueTask<decimal> QueryBalanceAsync(string merchantNo, string appSecret, string privateKey, CancellationToken cancellationToken = default)
     {
         var dict = new Dictionary<string, string?>
         {
             ["merchantNo"] = merchantNo,
-            ["time"] = _systemClock.UtcNow.ToUnixTimeSeconds().ToString(),
-            ["appSecret"] = appSecert,
+            ["time"] = timeProvider.GetUtcNow().ToUnixTimeSeconds().ToString(),
+            ["appSecret"] = appSecret,
         };
 
-        var sign = _hasher.ComputeHash(privateKey, dict.Where(x => x.Key != "appSecret"));
+        var sign = hasher.ComputeHash(privateKey, dict.Where(x => x.Key != "appSecret"));
         dict["sign"] = sign;
 
         var request = new HttpRequestMessage(HttpMethod.Post, "/payout/balance")
@@ -181,7 +167,7 @@ public class U2PayClient
             Content = new FormUrlEncodedContent(dict)
         };
 
-        var response = await _httpClient
+        var response = await httpClient
             .SendAsync(request, cancellationToken)
             .ConfigureAwait(false);
 
@@ -189,7 +175,7 @@ public class U2PayClient
 
         var body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
 
-        _logger.LogInformation("U2PayClient Query Merchant Balance Body:{body}", body);
+        logger.LogInformation("U2PayClient Query Merchant Balance Body:{body}", body);
 
         var node = JsonNode.Parse(body) ?? throw new ApiFailException("Query Merchant Balance response can't read.");
 
