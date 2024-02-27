@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
 	<SqlQueryToolsConnectionString />
     <UserSecretsId>059a0349-6150-4891-beb3-a368d9de1fac</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-	<DockerfileBuildArguments>--build-arg "BuildConfiguration=$(Configuration)"</DockerfileBuildArguments>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>	
 	<DockerfileTag Condition="$(DockerfileTag) == ''">pgtgs/payment-u2</DockerfileTag>
   </PropertyGroup>
 	
@@ -23,9 +22,9 @@
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.7.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.7.0" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.7.0" />
-		<PackageReference Include="PhoenixToolkits.MessageQueue.Nats" Version="1.0.6" />
+		<PackageReference Include="PhoenixToolkits.MessageQueue.Nats" Version="2.1.2" />
 		<PackageReference Include="ProfileViewer.OpenTelemetry.Exporter" Version="0.3.1" />
-		<PackageReference Include="Tgs.MessageQueue.Compatible" Version="0.0.2" />
+		<PackageReference Include="Tgs.MessageQueue.Nats.Serializers" Version="0.0.2" />
 		<PackageReference Include="Tgs.WebApi.Toolkits" Version="0.4.0" />
 	</ItemGroup>
 	

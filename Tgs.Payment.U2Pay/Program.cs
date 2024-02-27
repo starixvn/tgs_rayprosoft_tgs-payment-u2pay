@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.HttpLogging;
+﻿using FluentdForward.OpenTelemetry.MessagePack;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.Extensions.Options;
+using NATS.Client.Core;
 using OpenTelemetry.Instrumentation.AspNetCore;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Tgs.MessageQueue.Nats.Serializers;
 using Tgs.Payment.U2Pay;
 using Tgs.Payment.U2Pay.MessageQueue;
 
@@ -19,7 +22,9 @@ builder.Logging
             var nodeIp = builder.Configuration.GetValue<string>("NODE_IP")!;
             fluentOptions.Host = nodeIp;
             fluentOptions.Tag = builder.Configuration.GetValue<string>("OTEL_SERVICE_NAME")!;
-            fluentOptions.UseMessagePack();
+            fluentOptions.UseMessagePack(LogRecordFormatterResolver.GetResolverInstanceWithExtendInfo(
+                "MachineName",
+                () => Environment.MachineName));
         });
     });
 
@@ -36,8 +41,7 @@ builder.Services
 
                 http.BaseAddress = options.PaymentApiUrl;
             })
-            .AddLoggingHandler<U2PayOptions>())
-    .AddSerialNumberGenerator()
+            .AddLoggingHandler<U2PayOptions>())    
     .AddPaymentClient()
     .AddPaymentServiceClient(httpBuilder => httpBuilder
         .ConfigureHttpClient((sp, http) =>
@@ -48,14 +52,16 @@ builder.Services
         }));
 
 builder.Services
-    .AddPhoenixToolkitsMessageQueue()
-    .AddNatsMessageQueue(config => config
-        .ConfigQueueOptions((options, sp) =>
+    .AddKeyedSingleton(
+        "Nats",
+        (sp, _) => new NatsConnection(NatsOpts.Default with
         {
-            var config = sp.GetRequiredService<IConfiguration>();
-
-            options.Url = config.GetConnectionString("Nats")!;
-        })
+            Url = builder.Configuration.GetConnectionString("Nats")!,
+            SerializerRegistry = TgsNatsSerializerRegistration.Default
+        }))
+    .AddMessageQueue()
+    .AddNatsMessageQueue(config => config
+        .ConfigureResolveConnection(sp => sp.GetRequiredKeyedService<NatsConnection>("Nats"))
         .AddProcessor(
             ProcessorTypes.DepositProcessorType,
             "tgs.payment.u2pay.deposit",
@@ -67,7 +73,11 @@ builder.Services
         .AddHandler(
             ProcessorTypes.DepositTimeoutCheckHandlerType,
             $"tgs.payment.u2pay.deposit.schedule.reject",
-            $"tgs.payment.u2pay.deposit.schedule.reject"))
+            $"tgs.payment.u2pay.deposit.schedule.reject")
+        .AddProcessor(
+            ProcessorTypes.GetBalanceProcessorType,
+            "tgs.payment.u2pay.balance",
+            "tgs.payment.u2pay.balance"))
     .AddNatsGlobPatternExchange("*");
 
 builder.Services

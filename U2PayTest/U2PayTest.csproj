@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 	<SqlQueryToolsConnectionString />
@@ -10,15 +10,14 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.8.14">
+		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.9.28">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="NSubstitute" Version="5.1.0" />
-		<PackageReference Include="PhoenixToolkits.MessageQueue.Nats" Version="1.0.6" />
-		<PackageReference Include="Tgs.MessageQueue.Compatible" Version="0.0.2" />
-		<PackageReference Include="Tgs.Payment.Client" Version="0.5.0" />
-		<PackageReference Include="Tgs.WebApi.Toolkits" Version="0.3.0" />
+		<PackageReference Include="PhoenixToolkits.MessageQueue.Nats" Version="2.1.2" />
+		<PackageReference Include="Tgs.Payment.Client" Version="0.6.5" />
+		<PackageReference Include="Tgs.WebApi.Toolkits" Version="0.4.0" />
 	</ItemGroup>
 
 	<ItemGroup>

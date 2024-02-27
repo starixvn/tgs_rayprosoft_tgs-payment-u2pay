@@ -1,21 +1,25 @@
-﻿using System.Text.Json;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using NATS.Client.Core;
 using NSubstitute;
 using Tgs.Payment.Clients;
 using Tgs.Payment.U2Pay;
-using Tgs.Payment.U2Pay.Client;
-using Tgs.SerialNumberGenerator;
 
 var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services
+    .AddKeyedSingleton(
+        "Nats",
+        (sp, _) => new NatsConnection(NatsOpts.Default with
+        {
+            Url = "nats://localhost:4222"
+        }))
     .AddPaymentClient()
-    .AddPhoenixToolkitsMessageQueue()
+    .AddMessageQueue()
     .AddNatsMessageQueue(natsConfig => natsConfig
-        .ConfigQueueOptions((opt, _) => opt.Url = "nats://localhost:4222"))
+        .ConfigureResolveConnection(sp => sp.GetRequiredKeyedService<NatsConnection>("Nats")))
     .AddNatsGlobPatternExchange("*");
 
 var app = builder.Build();
@@ -68,10 +72,12 @@ var privateKey = "ClLtElIsn0O2VDFYYbTMZg";
 //logger.LogInformation("{return}", queryReturn);
 
 //商戶餘額查詢
-var httpClient = new HttpClient();
-httpClient.BaseAddress = new Uri("https://xr.hmpas.com");
-var fakeSystemClock = Substitute.For<ISystemClock>();
-var client = new U2PayClient(httpClient, new U2PayHasher(NullLogger<U2PayHasher>.Instance), fakeSystemClock, NullLogger<U2PayClient>.Instance);
+var httpClient = new HttpClient
+{
+    BaseAddress = new Uri("https://xr.hmpas.com")
+};
+var fakeTimeProvider = Substitute.For<TimeProvider>();
+var client = new U2PayClient(httpClient, new U2PayHasher(NullLogger<U2PayHasher>.Instance), fakeTimeProvider, NullLogger<U2PayClient>.Instance);
 
 var queryReturn = await client.QueryBalanceAsync(merchantNo, appSecret, privateKey);
 logger.LogInformation("{return}", queryReturn);

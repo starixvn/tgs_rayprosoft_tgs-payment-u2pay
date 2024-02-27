@@ -5,43 +5,37 @@ using Valhalla.MessageQueue;
 
 namespace Tgs.Payment.U2Pay.MessageQueue;
 
-internal class DepositTimeoutCheckHandler : IMessageHandler
+internal class DepositTimeoutCheckHandler(
+    IPaymentServiceClient paymentServiceClient,
+    IPaymentClient paymentClient,
+    ILogger<DepositTimeoutCheckHandler> logger)
+    : IMessageHandler<ScheduleRequest>
 {
-    private readonly IPaymentServiceClient _paymentServiceClient;
-    private readonly IPaymentClient _paymentClient;
-    private readonly ILogger<DepositTimeoutCheckHandler> _logger;
+    private readonly ILogger<DepositTimeoutCheckHandler> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-    public DepositTimeoutCheckHandler(
-        IPaymentServiceClient paymentServiceClient,
-        IPaymentClient paymentClient,
-        ILogger<DepositTimeoutCheckHandler> logger)
+    public async ValueTask HandleAsync(
+        string subject,
+        ScheduleRequest data,
+        IEnumerable<MessageHeaderValue>? headerValues,
+        CancellationToken cancellationToken = default)
     {
-        _paymentServiceClient = paymentServiceClient ?? throw new ArgumentNullException(nameof(paymentServiceClient));
-        _paymentClient = paymentClient ?? throw new ArgumentNullException(nameof(paymentClient));
-        _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-    }
-
-    public async ValueTask HandleAsync(ReadOnlyMemory<byte> data, CancellationToken cancellationToken = default)
-    {
-        var request = ScheduleRequest.Parser.ParseFrom(data.Span);
-
         _logger.LogInformation(
             "Deposit Schedule Handler Receive request Form Id:{request.FormId.ToGuid()}, "
                 + "Schedule Time:{request.ScheduleTime.ToDateTime():yyyy/MM/dd HH:mm:ss}",
-            request.FormId.ToGuid(),
-            request.ScheduleTime.ToDateTime());
+            data.FormId.ToGuid(),
+            data.ScheduleTime.ToDateTime());
 
-        var formId = request.FormId.ToGuid();
+        var formId = data.FormId.ToGuid();
 
         try
         {
-            var depositForm = await _paymentServiceClient
+            var depositForm = await paymentServiceClient
                 .GetDepositFormAsync(formId, cancellationToken)
                 .ConfigureAwait(false);
 
             if (depositForm is null)
             {
-                _logger.LogWarning("Deposit Form {request.FormId.ToGuid()} not found.", request.FormId.ToGuid());
+                _logger.LogWarning("Deposit Form {request.FormId.ToGuid()} not found.", data.FormId.ToGuid());
                 return;
             }
 
@@ -62,7 +56,7 @@ internal class DepositTimeoutCheckHandler : IMessageHandler
             {
                 await fsm.FireAsync(PaymentTrigger.Reject).ConfigureAwait(false);
 
-                await _paymentClient
+                await paymentClient
                     .RejectDepositAsync(formId, brandId, cancellationToken)
                     .ConfigureAwait(false);
             }
@@ -71,7 +65,7 @@ internal class DepositTimeoutCheckHandler : IMessageHandler
         {
             _logger.LogError(ex, "Process deposit timeout error!");
 
-            await _paymentClient.ScheduleAsync(
+            await paymentClient.ScheduleAsync(
                 "tgs.payment.u2pay.deposit.schedule.reject",
                 formId,
                 DateTime.UtcNow.AddMinutes(10D),
