@@ -25,7 +25,7 @@ internal class WithdrawProcessor(
         var order = new WithdrawOrder(
             settings.FormId,
             decimal.Parse(data.Amount) * settings.ExchangeRate,
-            new Uri($"{_options.CallbackBaseUrl}/withdraw/callback"),
+            new Uri(_options.CallbackBaseUrl,"/withdraw/callback"),
             settings.ReceiverName,
             settings.BankName,
             settings.BankAccount);

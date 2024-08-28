@@ -1,5 +1,6 @@
 ﻿using FluentdForward.OpenTelemetry.MessagePack;
 using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NATS.Client.Core;
 using OpenTelemetry.Instrumentation.AspNetCore;
@@ -118,7 +119,7 @@ builder.Services
                 ext => httpContext.Request.Path.Value.EndsWith($".{ext}")));
 
 var app = builder.Build();
-app.UsePathBase($"/{builder.Configuration.GetValue<string>("PathBase")}");
+app.UsePathBase($"{builder.Configuration.GetValue<string>("PathBase")}");
 app.UseHttpLogging();
 app.MapControllers();
 app.MapHealthChecks("/healthz");
