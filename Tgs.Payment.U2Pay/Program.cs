@@ -27,6 +27,7 @@ builder.Logging
                 () => Environment.MachineName));
         });
     });
+    
 
 builder.Services
     .AddControllers();
@@ -117,7 +118,7 @@ builder.Services
                 ext => httpContext.Request.Path.Value.EndsWith($".{ext}")));
 
 var app = builder.Build();
-
+app.UsePathBase($"/{builder.Configuration.GetValue<string>("PathBase")}");
 app.UseHttpLogging();
 app.MapControllers();
 app.MapHealthChecks("/healthz");
@@ -137,5 +138,5 @@ app.Use(async (context, next) =>
         _ = await stream.ReadToEndAsync().ConfigureAwait(false);
     }
 });
-
+SentrySdk.CaptureMessage($"Started result Tgs-U2Pay at {DateTime.Now.ToString()}");
 app.Run();
