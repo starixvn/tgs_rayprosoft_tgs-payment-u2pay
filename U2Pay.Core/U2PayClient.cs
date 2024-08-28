@@ -36,7 +36,7 @@ public class U2PayClient(
         var sign = hasher.ComputeHash(privateKey, dict.Where(x => !excludeKeys.Contains(x.Key)));
         dict["sign"] = sign;
 
-        var request = new HttpRequestMessage(HttpMethod.Post, "/order/create")
+        var request = new HttpRequestMessage(HttpMethod.Post, AddSubPath("/order/create"))
         {
             Content = new FormUrlEncodedContent(dict)
         };
