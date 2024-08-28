@@ -8,7 +8,6 @@ public class U2PayClient(
     HttpClient httpClient,
     U2PayHasher hasher,
     TimeProvider timeProvider,
-    IConfiguration configuration,
     ILogger<U2PayClient> logger)
 {
     public async ValueTask<U2PayClientDepositResponse> DepositAsync(string merchantNo, string appSecert, string privateKey, DepositOrder order, CancellationToken cancellationToken = default)
@@ -36,7 +35,7 @@ public class U2PayClient(
         var sign = hasher.ComputeHash(privateKey, dict.Where(x => !excludeKeys.Contains(x.Key)));
         dict["sign"] = sign;
 
-        var request = new HttpRequestMessage(HttpMethod.Post, AddSubPath("/order/create"))
+        var request = new HttpRequestMessage(HttpMethod.Post, "order/create")
         {
             Content = new FormUrlEncodedContent(dict)
         };
@@ -77,7 +76,7 @@ public class U2PayClient(
         var sign = hasher.ComputeHash(privateKey, dict.Where(x => x.Key != "appSecret"));
         dict["sign"] = sign;
 
-        var request = new HttpRequestMessage(HttpMethod.Post, AddSubPath("/order/status"))
+        var request = new HttpRequestMessage(HttpMethod.Post, "order/status")
         {
             Content = new FormUrlEncodedContent(dict)
         };
@@ -126,7 +125,7 @@ public class U2PayClient(
         var sign = hasher.ComputeHash(privateKey, dict.Where(x => !excludeKeys.Contains(x.Key)));
         dict["sign"] = sign;
 
-        var request = new HttpRequestMessage(HttpMethod.Post, AddSubPath("/payout/create"))
+        var request = new HttpRequestMessage(HttpMethod.Post, "payout/create")
         {
             Content = new FormUrlEncodedContent(dict)
         };
@@ -164,7 +163,7 @@ public class U2PayClient(
         var sign = hasher.ComputeHash(privateKey, dict.Where(x => x.Key != "appSecret"));
         dict["sign"] = sign;
 
-        var request = new HttpRequestMessage(HttpMethod.Post, AddSubPath("/order/status"))
+        var request = new HttpRequestMessage(HttpMethod.Post, "order/status")
         {
             Content = new FormUrlEncodedContent(dict)
         };
@@ -187,10 +186,5 @@ public class U2PayClient(
         var balance = node["balance"]!.GetValue<decimal>();
 
         return balance;
-    }
-
-    private string AddSubPath(string origin)
-    {
-        return $"/{configuration.GetValue<string>("PathBase")}{origin}";
     }
 }
