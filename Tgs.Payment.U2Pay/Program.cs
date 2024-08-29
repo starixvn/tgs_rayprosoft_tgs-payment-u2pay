@@ -1,6 +1,5 @@
 ﻿using FluentdForward.OpenTelemetry.MessagePack;
 using Microsoft.AspNetCore.HttpLogging;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using NATS.Client.Core;
 using OpenTelemetry.Instrumentation.AspNetCore;
@@ -12,7 +11,7 @@ using Tgs.Payment.U2Pay;
 using Tgs.Payment.U2Pay.MessageQueue;
 
 var builder = WebApplication.CreateBuilder(args);
-
+builder.WebHost.UseSentry();
 builder.Logging
     .AddOpenTelemetry(options =>
     {
@@ -139,5 +138,5 @@ app.Use(async (context, next) =>
         _ = await stream.ReadToEndAsync().ConfigureAwait(false);
     }
 });
-SentrySdk.CaptureMessage($"Started result Tgs-U2Pay at {DateTime.Now.ToString()}");
+SentrySdk.CaptureMessage($"Started result Tgs-U2Pay at {DateTime.Now.ToString()} at {Environment.MachineName}");
 app.Run();
