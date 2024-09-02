@@ -1,5 +1,4 @@
 ﻿using System.Text.Json.Nodes;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Tgs.Payment.U2Pay;

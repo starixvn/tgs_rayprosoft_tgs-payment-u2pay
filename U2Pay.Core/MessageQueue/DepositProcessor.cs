@@ -28,7 +28,7 @@ internal class DepositProcessor(
         var order = new DepositOrder(
             decimal.Parse(data.Amount) * settings.ExchangeRate,
             settings.FormId,
-            new Uri($"{_options.CallbackBaseUrl}/deposit/callback"),
+            new Uri(_options.CallbackBaseUrl,"deposit/callback"),
             settings.ChannelNo,
             settings.BankName);
 
